@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Inkwell — Blog Platform</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --ink:#1a1a2e;--ink2:#16213e;--paper:#fafaf7;--paper2:#f4f3ef;
+    --accent:#c94b4b;--accent2:#e8736e;--muted:#888;--border:#e0ddd6;
+    --card:#ffffff;--shadow:0 1px 4px rgba(0,0,0,.07);
+    --font-serif:'Georgia',serif;--font-sans:'Inter','Segoe UI',sans-serif;
+    --radius:10px;--radius-sm:6px;
+  }
+  body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.6}
+
+  /* NAV */
+  nav{background:var(--card);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100}
+  .logo{font-family:var(--font-serif);font-size:22px;color:var(--accent);font-style:italic;font-weight:700;letter-spacing:-0.5px;cursor:pointer}
+  .nav-right{display:flex;align-items:center;gap:12px}
+  .nav-user{font-size:13px;color:var(--muted)}
+  .btn{padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;font-size:13px;font-family:var(--font-sans);transition:all .15s;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{background:var(--paper2);border-color:#ccc}
+  .btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn-primary:hover{background:#b03e3e;border-color:#b03e3e}
+  .btn-sm{padding:5px 12px;font-size:12px}
+  .btn-ghost{border:none;background:none;color:var(--muted);padding:5px 8px}
+  .btn-ghost:hover{color:var(--ink);background:var(--paper2)}
+  .btn-danger{background:none;border:1px solid #f5c5c5;color:#c94b4b}
+  .btn-danger:hover{background:#fff5f5}
+
+  /* PAGES */
+  .page{display:none;animation:fadeIn .2s ease}
+  .page.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* AUTH */
+  .auth-wrap{max-width:420px;margin:60px auto;padding:0 1.5rem}
+  .auth-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem}
+  .auth-card h2{font-family:var(--font-serif);font-size:26px;margin-bottom:6px;font-style:italic}
+  .auth-card p.sub{color:var(--muted);font-size:13px;margin-bottom:1.5rem}
+  .field{margin-bottom:1rem}
+  .field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:5px}
+  .field input,.field textarea,.field select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:var(--font-sans);background:var(--paper);color:var(--ink);outline:none;transition:border .15s}
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);background:#fff}
+  .field textarea{resize:vertical;min-height:120px;line-height:1.6}
+  .auth-switch{text-align:center;margin-top:1rem;font-size:13px;color:var(--muted)}
+  .auth-switch a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:500}
+  .auth-switch a:hover{text-decoration:underline}
+  .error-msg{background:#fff5f5;border:1px solid #fdc5c5;color:#c94b4b;padding:9px 12px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:1rem}
+
+  /* HOME */
+  .home-wrap{max-width:900px;margin:0 auto;padding:2rem 1.5rem}
+  .home-hero{text-align:center;padding:3rem 0 2.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem}
+  .home-hero h1{font-family:var(--font-serif);font-size:42px;font-style:italic;color:var(--ink);margin-bottom:10px}
+  .home-hero p{color:var(--muted);font-size:15px;max-width:400px;margin:0 auto}
+  .posts-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+  .posts-header h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+  .post-grid{display:grid;gap:1.25rem}
+  .post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;cursor:pointer;transition:all .15s;position:relative}
+  .post-card:hover{border-color:#bbb;box-shadow:var(--shadow);transform:translateY(-1px)}
+  .post-card-meta{display:flex;align-items:center;gap:8px;margin-bottom:.6rem;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .post-card-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--muted)}
+  .post-card h3{font-family:var(--font-serif);font-size:20px;font-style:italic;margin-bottom:.4rem;color:var(--ink);line-height:1.35}
+  .post-card p{font-size:14px;color:#555;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .post-card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:1rem;padding-top:.75rem;border-top:1px solid var(--border)}
+  .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;background:#f0eee8;color:#666;font-weight:500;letter-spacing:.03em}
+  .comment-count{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px}
+  .author-badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;flex-shrink:0}
+  .empty-state{text-align:center;padding:4rem 1rem;color:var(--muted)}
+  .empty-state i{font-size:48px;display:block;margin-bottom:1rem;color:#ccc}
+  .empty-state p{font-size:15px}
+
+  /* POST PAGE */
+  .post-wrap{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+  .back-btn{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:13px;cursor:pointer;margin-bottom:1.5rem;border:none;background:none;padding:0;font-family:var(--font-sans);transition:color .15s}
+  .back-btn:hover{color:var(--ink)}
+  .post-title{font-family:var(--font-serif);font-size:34px;font-style:italic;line-height:1.3;margin-bottom:.85rem;color:var(--ink)}
+  .post-meta{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin-bottom:1.75rem;padding-bottom:1.75rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+  .post-actions{display:flex;gap:8px;margin-left:auto}
+  .post-body{font-size:16px;line-height:1.85;color:#2a2a2a}
+  .post-body p{margin-bottom:1.1rem}
+
+  /* COMMENTS */
+  .comments-section{margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+  .comments-section h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1.25rem}
+  .comment-form{background:var(--paper2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.75rem}
+  .comment-form h4{font-size:13px;font-weight:600;margin-bottom:.75rem;color:var(--ink)}
+  .comment-item{padding:1.1rem 0;border-bottom:1px solid var(--border)}
+  .comment-item:last-child{border-bottom:none}
+  .comment-header{display:flex;align-items:center;gap:8px;margin-bottom:.4rem}
+  .comment-author{font-size:13px;font-weight:600;color:var(--ink)}
+  .comment-date{font-size:11px;color:var(--muted)}
+  .comment-text{font-size:14px;color:#444;line-height:1.65}
+  .comment-del{margin-left:auto;border:none;background:none;color:#ccc;cursor:pointer;font-size:13px;padding:2px 6px;border-radius:4px;transition:all .15s}
+  .comment-del:hover{color:var(--accent);background:#fff5f5}
+
+  /* EDITOR */
+  .editor-wrap{max-width:720px;margin:0 auto;padding:2rem 1.5rem}
+  .editor-wrap h2{font-family:var(--font-serif);font-size:28px;font-style:italic;margin-bottom:1.75rem}
+  .editor-actions{display:flex;gap:8px;margin-top:1.5rem;justify-content:flex-end}
+  .char-count{font-size:11px;color:var(--muted);text-align:right;margin-top:4px}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:var(--radius-sm);font-size:13px;z-index:9999;opacity:0;pointer-events:none;transition:opacity .25s;max-width:300px;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+  .toast.show{opacity:1}
+  .toast.success{background:#2d7a4f}
+  .toast.error{background:var(--accent)}
+
+  /* PROFILE */
+  .profile-wrap{max-width:640px;margin:0 auto;padding:2rem 1.5rem}
+  .profile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.5rem}
+  .profile-avatar{width:68px;height:68px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:700;font-family:var(--font-serif);flex-shrink:0}
+  .profile-info h2{font-family:var(--font-serif);font-size:22px;font-style:italic;margin-bottom:4px}
+  .profile-info p{font-size:13px;color:var(--muted)}
+  .profile-stats{display:flex;gap:1.5rem;margin-top:.5rem}
+  .profile-stat{font-size:12px;color:var(--muted)}
+  .profile-stat strong{color:var(--ink);font-size:16px;display:block}
+  .my-posts-list{display:grid;gap:.75rem}
+  .my-post-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;transition:border .15s}
+  .my-post-item:hover{border-color:#ccc}
+  .my-post-item h4{font-size:15px;font-family:var(--font-serif);font-style:italic;cursor:pointer;color:var(--ink);margin-bottom:3px}
+  .my-post-item h4:hover{color:var(--accent)}
+  .my-post-item-actions{display:flex;gap:6px;flex-shrink:0}
+
+  /* SEARCH */
+  .search-bar{position:relative;max-width:340px}
+  .search-bar input{padding:7px 12px 7px 34px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;background:var(--paper2);color:var(--ink);width:100%;outline:none;font-family:var(--font-sans)}
+  .search-bar input:focus{border-color:var(--accent);background:#fff}
+  .search-bar i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px;pointer-events:none}
+
+  /* RESPONSIVE */
+  @media(max-width:600px){
+    nav{padding:0 1rem}
+    .home-wrap,.post-wrap,.editor-wrap,.profile-wrap{padding:1.25rem 1rem}
+    .home-hero h1{font-size:30px}
+    .post-title{font-size:26px}
+    .profile-card{flex-direction:column;text-align:center}
+    .post-actions{margin-left:0;margin-top:.5rem}
+    .post-meta{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <span class="logo" onclick="showPage('home')">Inkwell</span>
+  <div class="nav-right">
+    <span class="nav-user" id="navUser"></span>
+    <button class="btn btn-sm" id="navProfile" style="display:none" onclick="showProfile()">
+      <i class="ti ti-user" aria-hidden="true"></i> Profile
+    </button>
+    <button class="btn btn-sm btn-primary" id="navWrite" style="display:none" onclick="showEditor(null)">
+      <i class="ti ti-pencil" aria-hidden="true"></i> Write
+    </button>
+    <button class="btn btn-sm" id="navLogin" onclick="showPage('auth')">Sign in</button>
+    <button class="btn btn-sm" id="navLogout" style="display:none" onclick="logout()">
+      <i class="ti ti-logout" aria-hidden="true"></i> Sign out
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════════ AUTH PAGE -->
+<div class="page" id="page-auth">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h2 id="authTitle">Welcome back</h2>
+      <p class="sub" id="authSub">Sign in to your Inkwell account</p>
+      <div id="authError" class="error-msg" style="display:none"></div>
+      <div class="field" id="authNameField" style="display:none">
+        <label>Display name</label>
+        <input type="text" id="authName" placeholder="Your name" autocomplete="name"/>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="authEmail" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="authPassword" placeholder="Password"
+          autocomplete="current-password" onkeydown="if(event.key==='Enter')doAuth()"/>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doAuth()" id="authBtn">
+        Sign in
+      </button>
+      <p class="auth-switch">
+        <a onclick="toggleAuthMode()" id="authToggle">Don't have an account? Register</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ HOME PAGE -->
+<div class="page active" id="page-home">
+  <div class="home-wrap">
+    <div class="home-hero">
+      <h1>Stories worth reading</h1>
+      <p>Independent voices, long-form ideas, short takes — all in one place.</p>
+    </div>
+    <div class="posts-header">
+      <h2>Latest posts</h2>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="search-bar">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <input type="text" id="searchInput" placeholder="Search posts…" oninput="renderHome()"/>
+        </div>
+        <span id="postCount" style="font-size:12px;color:var(--muted);white-space:nowrap"></span>
+      </div>
+    </div>
+    <div class="post-grid" id="postGrid"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ POST READ PAGE -->
+<div class="page" id="page-post">
+  <div class="post-wrap">
+    <button class="back-btn" onclick="showPage('home')">
+      <i class="ti ti-arrow-left" aria-hidden="true"></i> All posts
+    </button>
+    <div id="postContent"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ EDITOR PAGE -->
+<div class="page" id="page-editor">
+  <div class="editor-wrap">
+    <h2 id="editorTitle">Write a new post</h2>
+    <div class="field">
+      <label>Title</label>
+      <input type="text" id="editorPostTitle" placeholder="Give your post a compelling title…" maxlength="120"/>
+    </div>
+    <div class="field">
+      <label>Tag / category</label>
+      <input type="text" id="editorTag" placeholder="e.g. Technology, Culture, Opinion…" maxlength="30"/>
+    </div>
+    <div class="field">
+      <label>Body</label>
+      <textarea id="editorBody" style="min-height:340px"
+        placeholder="Start writing… (use blank lines to separate paragraphs)"
+        oninput="updateCharCount()"></textarea>
+      <p class="char-count" id="charCount">0 characters</p>
+    </div>
+    <div class="editor-actions">
+      <button class="btn" onclick="cancelEditor()">
+        <i class="ti ti-x" aria-hidden="true"></i> Cancel
+      </button>
+      <button class="btn btn-primary" onclick="savePost()">
+        <i class="ti ti-check" aria-hidden="true"></i> <span id="publishBtnLabel">Publish</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ PROFILE PAGE -->
+<div class="page" id="page-profile">
+  <div class="profile-wrap">
+    <button class="back-btn" onclick="showPage('home')">
+      <i class="ti ti-arrow-left" aria-hidden="true"></i> Back to posts
+    </button>
+    <div class="profile-card" id="profileCard"></div>
+    <div class="posts-header" style="margin-top:1.5rem"><h2>My posts</h2></div>
+    <div class="my-posts-list" id="myPostsList"></div>
+  </div>
+</div>
+
+<!-- TOAST NOTIFICATION -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// DATA LAYER  (localStorage persistence)
+// ─────────────────────────────────────────────────────────────────────────────
+let db = {
+  users:    JSON.parse(localStorage.getItem('ik_users')    || '[]'),
+  posts:    JSON.parse(localStorage.getItem('ik_posts')    || '[]'),
+  comments: JSON.parse(localStorage.getItem('ik_comments') || '[]'),
+};
+let currentUser  = JSON.parse(localStorage.getItem('ik_session') || 'null');
+let editingPostId = null;
+let authIsRegister = false;
+let prevPage = 'home';
+
+function persist() {
+  localStorage.setItem('ik_users',    JSON.stringify(db.users));
+  localStorage.setItem('ik_posts',    JSON.stringify(db.posts));
+  localStorage.setItem('ik_comments', JSON.stringify(db.comments));
+}
+function saveSession() {
+  localStorage.setItem('ik_session', JSON.stringify(currentUser));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SEED DATA  (runs once on fresh install)
+// ─────────────────────────────────────────────────────────────────────────────
+if (db.posts.length === 0) {
+  db.users.push({
+    id: 'u0', email: 'demo@inkwell.com', password: 'demo123', name: 'Alex Rivers'
+  });
+  db.posts.push(
+    {
+      id: 'p1', authorId: 'u0', authorName: 'Alex Rivers',
+      title: 'The quiet art of slow mornings', tag: 'Life',
+      body: 'There is something deeply restorative about a morning that moves at its own pace. No alerts, no notifications — just the soft tick of a clock and the smell of coffee brewing.\n\nI have spent years optimising my mornings, and the most productive thing I ever did was stop optimising them. The hours before the world wakes are not a runway for productivity; they are the only time that truly belongs to you.\n\nTry it for a week. Wake up without an alarm. Sit with your thoughts. Write nothing down. Let the ideas come and go like clouds. You may find that the best work of your life begins in the silence before you start.',
+      createdAt: Date.now() - 86400000 * 3
+    },
+    {
+      id: 'p2', authorId: 'u0', authorName: 'Alex Rivers',
+      title: 'Why every programmer should keep a paper notebook', tag: 'Technology',
+      body: 'Digital note-taking apps are powerful, organised, and searchable. They are also, I would argue, subtly hostile to the kind of thinking that produces original work.\n\nWhen you type, you edit as you go. The backspace key is the enemy of half-formed ideas — the very ideas that, given room, become insights. Paper has no backspace. A crossed-out line still exists; you can return to it.\n\nI have kept a paper notebook alongside my editor for four years. Every architecture decision, every naming debate, every "what if" that seemed too silly to commit — all of it goes on paper. About one in ten of those "silly" ideas has shipped to production.\n\nThe notebook is not a second brain. It is the first one.',
+      createdAt: Date.now() - 86400000 * 1
+    }
+  );
+  persist();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────────────────────────────────────
+function toggleAuthMode() {
+  authIsRegister = !authIsRegister;
+  document.getElementById('authTitle').textContent    = authIsRegister ? 'Create account'              : 'Welcome back';
+  document.getElementById('authSub').textContent      = authIsRegister ? 'Join the Inkwell community'  : 'Sign in to your Inkwell account';
+  document.getElementById('authNameField').style.display = authIsRegister ? 'block' : 'none';
+  document.getElementById('authBtn').textContent      = authIsRegister ? 'Register' : 'Sign in';
+  document.getElementById('authToggle').textContent   = authIsRegister ? 'Already have an account? Sign in' : "Don't have an account? Register";
+  document.getElementById('authError').style.display  = 'none';
+  document.getElementById('authEmail').value = '';
+  document.getElementById('authPassword').value = '';
+  document.getElementById('authName').value = '';
+}
+
+function doAuth() {
+  const email    = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const name     = document.getElementById('authName').value.trim();
+  const err      = document.getElementById('authError');
+  err.style.display = 'none';
+
+  if (!email || !password) {
+    err.textContent = 'Please fill in all fields.';
+    err.style.display = 'block'; return;
+  }
+
+  if (authIsRegister) {
+    if (!name) {
+      err.textContent = 'Please enter your display name.';
+      err.style.display = 'block'; return;
+    }
+    if (db.users.find(u => u.email === email)) {
+      err.textContent = 'An account with this email already exists.';
+      err.style.display = 'block'; return;
+    }
+    if (password.length < 6) {
+      err.textContent = 'Password must be at least 6 characters.';
+      err.style.display = 'block'; return;
+    }
+    const user = { id: 'u' + Date.now(), email, password, name };
+    db.users.push(user);
+    persist();
+    currentUser = user;
+    saveSession();
+    showToast('Account created! Welcome to Inkwell.', 'success');
+  } else {
+    const user = db.users.find(u => u.email === email && u.password === password);
+    if (!user) {
+      err.textContent = 'Invalid email or password.';
+      err.style.display = 'block'; return;
+    }
+    currentUser = user;
+    saveSession();
+    showToast('Welcome back, ' + user.name + '!', 'success');
+  }
+  updateNav();
+  showPage('home');
+}
+
+function logout() {
+  currentUser = null;
+  localStorage.removeItem('ik_session');
+  updateNav();
+  showPage('home');
+  showToast('Signed out.');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'home') renderHome();
+}
+
+function updateNav() {
+  const loggedIn = !!currentUser;
+  document.getElementById('navUser').textContent         = currentUser ? currentUser.name : '';
+  document.getElementById('navWrite').style.display      = loggedIn ? 'inline-flex' : 'none';
+  document.getElementById('navProfile').style.display    = loggedIn ? 'inline-flex' : 'none';
+  document.getElementById('navLogout').style.display     = loggedIn ? 'inline-flex' : 'none';
+  document.getElementById('navLogin').style.display      = loggedIn ? 'none'        : 'inline-flex';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HOME / POST LIST
+// ─────────────────────────────────────────────────────────────────────────────
+function renderHome() {
+  const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  const grid  = document.getElementById('postGrid');
+  let posts   = [...db.posts].sort((a, b) => b.createdAt - a.createdAt);
+
+  if (query) {
+    posts = posts.filter(p =>
+      p.title.toLowerCase().includes(query) ||
+      p.body.toLowerCase().includes(query) ||
+      p.authorName.toLowerCase().includes(query) ||
+      (p.tag || '').toLowerCase().includes(query)
+    );
+  }
+
+  document.getElementById('postCount').textContent = posts.length + ' post' + (posts.length !== 1 ? 's' : '');
+
+  if (posts.length === 0) {
+    grid.innerHTML = `<div class="empty-state">
+      <i class="ti ti-news" aria-hidden="true"></i>
+      <p>${query ? 'No posts match "' + query + '".' : 'No posts yet. Be the first to write!'}</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = posts.map(p => {
+    const commentCount = db.comments.filter(c => c.postId === p.id).length;
+    const initials     = initials2(p.authorName);
+    const date         = fmtDate(p.createdAt);
+    const preview      = p.body.replace(/\n+/g, ' ').substring(0, 150) + '…';
+    return `<div class="post-card" onclick="readPost('${p.id}')">
+      <div class="post-card-meta">
+        <span class="author-badge">${initials}</span>
+        <span>${p.authorName}</span>
+        <span class="dot"></span>
+        <span>${date}</span>
+        ${p.tag ? `<span class="dot"></span><span class="tag">${p.tag}</span>` : ''}
+      </div>
+      <h3>${p.title}</h3>
+      <p>${preview}</p>
+      <div class="post-card-footer">
+        <span></span>
+        <span class="comment-count">
+          <i class="ti ti-message-circle" aria-hidden="true"></i> ${commentCount}
+        </span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// READ POST
+// ─────────────────────────────────────────────────────────────────────────────
+function readPost(id) {
+  const post = db.posts.find(p => p.id === id);
+  if (!post) return;
+
+  const date     = fmtDate(post.createdAt, true);
+  const isAuthor = currentUser && currentUser.id === post.authorId;
+  const bodyHtml = post.body.split(/\n\n+/).filter(Boolean)
+    .map(para => `<p>${para.replace(/\n/g, '<br>')}</p>`).join('');
+  const comments = db.comments.filter(c => c.postId === id);
+
+  const commentsHtml = comments.length === 0
+    ? '<div style="padding:1.5rem 0;color:var(--muted);font-size:14px">No comments yet. Start the conversation.</div>'
+    : comments.map(c => {
+        const canDel = currentUser && (currentUser.id === c.authorId || currentUser.id === post.authorId);
+        return `<div class="comment-item" id="comment-${c.id}">
+          <div class="comment-header">
+            <span class="author-badge" style="font-size:10px;width:22px;height:22px">${initials2(c.authorName)}</span>
+            <span class="comment-author">${c.authorName}</span>
+            <span class="comment-date">${fmtDate(c.createdAt)}</span>
+            ${canDel ? `<button class="comment-del" onclick="deleteComment('${c.id}','${id}')" title="Delete comment">
+              <i class="ti ti-x" aria-hidden="true"></i>
+            </button>` : ''}
+          </div>
+          <p class="comment-text">${c.text}</p>
+        </div>`;
+      }).join('');
+
+  const commentFormHtml = currentUser
+    ? `<div class="comment-form">
+        <h4>Add a comment</h4>
+        <div class="field" style="margin-bottom:.75rem">
+          <textarea id="commentInput" style="min-height:90px" placeholder="Share your thoughts…"></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="addComment('${id}')">
+          <i class="ti ti-send" aria-hidden="true"></i> Post comment
+        </button>
+      </div>`
+    : `<div style="background:var(--paper2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;text-align:center;margin-bottom:1.75rem">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:.6rem">Sign in to join the conversation</p>
+        <button class="btn btn-sm btn-primary" onclick="showPage('auth')">Sign in</button>
+      </div>`;
+
+  document.getElementById('postContent').innerHTML = `
+    <h1 class="post-title">${post.title}</h1>
+    <div class="post-meta">
+      <span class="author-badge">${initials2(post.authorName)}</span>
+      <span>${post.authorName}</span>
+      <span style="color:var(--border)">·</span>
+      <span>${date}</span>
+      ${post.tag ? `<span class="tag">${post.tag}</span>` : ''}
+      ${isAuthor ? `<div class="post-actions">
+        <button class="btn btn-sm btn-ghost" onclick="showEditor('${id}')">
+          <i class="ti ti-edit" aria-hidden="true"></i> Edit
+        </button>
+        <button class="btn btn-sm btn-danger" onclick="deletePost('${id}')">
+          <i class="ti ti-trash" aria-hidden="true"></i> Delete
+        </button>
+      </div>` : ''}
+    </div>
+    <div class="post-body">${bodyHtml}</div>
+    <div class="comments-section">
+      <h3>${comments.length} comment${comments.length !== 1 ? 's' : ''}</h3>
+      ${commentFormHtml}
+      <div id="commentsList">${commentsHtml}</div>
+    </div>`;
+
+  showPage('post');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMMENTS
+// ─────────────────────────────────────────────────────────────────────────────
+function addComment(postId) {
+  if (!currentUser) { showPage('auth'); return; }
+  const input = document.getElementById('commentInput');
+  const text  = input.value.trim();
+  if (!text) { showToast('Write something first.', 'error'); return; }
+
+  db.comments.push({
+    id: 'c' + Date.now(),
+    postId,
+    authorId:   currentUser.id,
+    authorName: currentUser.name,
+    text,
+    createdAt:  Date.now()
+  });
+  persist();
+  input.value = '';
+  showToast('Comment posted!', 'success');
+  readPost(postId);
+}
+
+function deleteComment(commentId, postId) {
+  if (!confirm('Delete this comment?')) return;
+  db.comments = db.comments.filter(c => c.id !== commentId);
+  persist();
+  readPost(postId);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POSTS — CREATE / EDIT / DELETE
+// ─────────────────────────────────────────────────────────────────────────────
+function showEditor(postId) {
+  if (!currentUser) { showPage('auth'); return; }
+  editingPostId = postId;
+
+  if (postId) {
+    const post = db.posts.find(p => p.id === postId);
+    if (!post || post.authorId !== currentUser.id) {
+      showToast('Not authorised.', 'error'); return;
+    }
+    document.getElementById('editorTitle').textContent       = 'Edit post';
+    document.getElementById('publishBtnLabel').textContent   = 'Save changes';
+    document.getElementById('editorPostTitle').value         = post.title;
+    document.getElementById('editorTag').value               = post.tag || '';
+    document.getElementById('editorBody').value              = post.body;
+  } else {
+    document.getElementById('editorTitle').textContent       = 'Write a new post';
+    document.getElementById('publishBtnLabel').textContent   = 'Publish';
+    document.getElementById('editorPostTitle').value         = '';
+    document.getElementById('editorTag').value               = '';
+    document.getElementById('editorBody').value              = '';
+  }
+  updateCharCount();
+  showPage('editor');
+}
+
+function cancelEditor() {
+  if (editingPostId) { readPost(editingPostId); }
+  else { showPage('home'); }
+}
+
+function updateCharCount() {
+  const len = document.getElementById('editorBody').value.length;
+  document.getElementById('charCount').textContent = len.toLocaleString() + ' character' + (len !== 1 ? 's' : '');
+}
+
+function savePost() {
+  if (!currentUser) { showPage('auth'); return; }
+  const title = document.getElementById('editorPostTitle').value.trim();
+  const tag   = document.getElementById('editorTag').value.trim();
+  const body  = document.getElementById('editorBody').value.trim();
+
+  if (!title) { showToast('Add a title.', 'error'); return; }
+  if (!body)  { showToast('Write something in the body.', 'error'); return; }
+
+  if (editingPostId) {
+    const idx = db.posts.findIndex(p => p.id === editingPostId);
+    if (idx > -1) { db.posts[idx] = { ...db.posts[idx], title, tag, body, updatedAt: Date.now() }; }
+    persist();
+    showToast('Post updated.', 'success');
+    readPost(editingPostId);
+  } else {
+    const post = {
+      id: 'p' + Date.now(), authorId: currentUser.id, authorName: currentUser.name,
+      title, tag, body, createdAt: Date.now()
+    };
+    db.posts.push(post);
+    persist();
+    showToast('Post published!', 'success');
+    readPost(post.id);
+  }
+}
+
+function deletePost(postId) {
+  if (!confirm('Delete this post? This cannot be undone.')) return;
+  db.posts    = db.posts.filter(p => p.id !== postId);
+  db.comments = db.comments.filter(c => c.postId !== postId);
+  persist();
+  showToast('Post deleted.');
+  showPage('home');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFILE
+// ─────────────────────────────────────────────────────────────────────────────
+function showProfile() {
+  if (!currentUser) return;
+  const init       = initials2(currentUser.name);
+  const myPosts    = db.posts.filter(p => p.authorId === currentUser.id);
+  const myComments = db.comments.filter(c => c.authorId === currentUser.id);
+
+  document.getElementById('profileCard').innerHTML = `
+    <div class="profile-avatar">${init}</div>
+    <div class="profile-info">
+      <h2>${currentUser.name}</h2>
+      <p>${currentUser.email}</p>
+      <div class="profile-stats">
+        <div class="profile-stat"><strong>${myPosts.length}</strong>Posts</div>
+        <div class="profile-stat"><strong>${myComments.length}</strong>Comments</div>
+      </div>
+    </div>`;
+
+  const list = document.getElementById('myPostsList');
+  if (myPosts.length === 0) {
+    list.innerHTML = `<div class="empty-state" style="padding:2rem">
+      <i class="ti ti-pencil" aria-hidden="true"></i>
+      <p>No posts yet. <a style="color:var(--accent);cursor:pointer" onclick="showEditor(null)">Write your first one.</a></p>
+    </div>`;
+  } else {
+    const sorted = [...myPosts].sort((a, b) => b.createdAt - a.createdAt);
+    list.innerHTML = sorted.map(p => {
+      const cc = db.comments.filter(c => c.postId === p.id).length;
+      return `<div class="my-post-item">
+        <div style="min-width:0">
+          <h4 onclick="readPost('${p.id}')">${p.title}</h4>
+          <span style="font-size:11px;color:var(--muted)">${cc} comment${cc !== 1 ? 's' : ''} · ${p.tag || 'No tag'} · ${fmtDate(p.createdAt)}</span>
+        </div>
+        <div class="my-post-item-actions">
+          <button class="btn btn-sm btn-ghost" onclick="showEditor('${p.id}')" title="Edit">
+            <i class="ti ti-edit" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deletePost('${p.id}')" title="Delete">
+            <i class="ti ti-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  showPage('profile');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+function initials2(name) {
+  return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+}
+
+function fmtDate(ts, long = false) {
+  return new Date(ts).toLocaleDateString('en-US', long
+    ? { month: 'long', day: 'numeric', year: 'numeric' }
+    : { month: 'short', day: 'numeric', year: 'numeric' }
+  );
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────────────────────────────
+updateNav();
+renderHome();
+</script>
+</body>
+</html>
